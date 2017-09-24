@@ -5,6 +5,7 @@ package com.github.nerdadventurer.gameoflife.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -20,7 +21,7 @@ public class BoardState implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private long turnNumber;
-	private ArrayList<CellModel> liveCells;
+	private List<CellModel> liveCells;
 	/**
 	 * 
 	 */
@@ -29,11 +30,11 @@ public class BoardState implements Serializable {
 	}
 	
 	/**
-	 * @param live ArrayList of live cells on board this game turn
+	 * @param liveCellsNow ArrayList of live cells on board this game turn
 	 * @param turn Turn number
 	 */
-	public BoardState(ArrayList<CellModel> live, long turn){
-		this.liveCells=live;
+	public BoardState(List<CellModel> liveCellsNow, long turn){
+		this.liveCells=liveCellsNow;
 		this.turnNumber=turn;
 	}
 
@@ -54,14 +55,14 @@ public class BoardState implements Serializable {
 	/**
 	 * @return the liveCells
 	 */
-	public ArrayList<CellModel> getLiveCells() {
+	public List<CellModel> getLiveCells() {
 		return liveCells;
 	}
 
 	/**
 	 * @param liveCells the liveCells to set
 	 */
-	public void setLiveCells(ArrayList<CellModel> liveCells) {
+	public void setLiveCells(List<CellModel> liveCells) {
 		this.liveCells = liveCells;
 	}
 
@@ -83,14 +84,14 @@ public class BoardState implements Serializable {
 		}
 		else{
 			Stream<CellModel> thisLivingAsStream=this.liveCells.stream();
-			ArrayList<CellModel> otherLiving=other.getLiveCells();
+			List<CellModel> otherLiving=other.getLiveCells();
 			Predicate<CellModel> notInOther = p -> !otherLiving.contains(p);
 			thisLivingAsStream.filter(notInOther); // Because all elements in both lists are unique, any match must be 1:1.
 			return thisLivingAsStream.count()==0;
 		}
 	}
 
-	private long getLiveCount() {
+	long getLiveCount() {
 		return this.liveCells.size();
 	}
 

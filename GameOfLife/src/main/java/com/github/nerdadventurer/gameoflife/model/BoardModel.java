@@ -6,6 +6,10 @@ package com.github.nerdadventurer.gameoflife.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a logical model of a grid of cells.
@@ -110,5 +114,56 @@ public class BoardModel implements Serializable {
 		else{
 			return xyMap.get(x).get(y);
 		}		
+	}
+	
+	/**
+	 * Get representation of current board state as a collection of live cells, and a turn number.
+	 * @return current board state
+	 */
+	private BoardState getCurrentState(){
+		Stream<CellModel> neighborStream = cells.stream();
+		Predicate<CellModel> itIsAlive = p-> p.isAlive();
+		List<CellModel> liveCellsNow = neighborStream.filter(itIsAlive).collect(Collectors.toList());
+		BoardState state = new BoardState(liveCellsNow,this.turnNumber);
+		return state;
+	}
+	
+	/**
+	 * Check if board has reached a looping state, and if not, store current state to cache.
+	 * Must be called <b> exactly once</b> per cycle. 
+	 */
+	public void updateLoopCache(){
+		BoardState current = getCurrentState();
+		long liveNow = current.getLiveCount();	
+		if(loopDetectionCache.containsKey(liveNow)){
+			//There are previous states with same live cell count. Get list of those from cache.
+			ArrayList<BoardState> sameCount = loopDetectionCache.get(liveNow);
+			Stream<BoardState> sameCountStream = sameCount.stream();
+			Predicate<BoardState> identicalExists = p-> p.isIdentical(current);
+			if(sameCountStream.filter(identicalExists).count()>0){
+				// Identical board state was found; stop simulation on loop state.
+				stopOnLoop();
+			}
+			else{
+				// None of the states were identical, add this state to cache and carry on.
+				sameCount.add(current);
+				nextStep();
+			}
+		}
+		else{
+			// There are no previous states with same live cell count; start a new list of states with this live cell count, add current state, and continue.
+			ArrayList<BoardState> newCount = new ArrayList<BoardState>();
+			newCount.add(current);
+			loopDetectionCache.put(liveNow, newCount);
+			nextStep();
+		}
+	}
+
+	private void stopOnLoop() {
+		// TODO STOP! HAMMERTIME!
+	}
+	
+	private void nextStep(){
+		// TODO Keep calm and carry on...
 	}
 }
